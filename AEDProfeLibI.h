@@ -16,9 +16,8 @@ namespace AEDnames {
 	}
 	template<class T>
 	void Nodo<T>::setAnterior(Nodo<T>* anterior) {
-		if (anterior != nullptr) {
-			this->anterior = anterior;
-		}
+		// Permitimos nullptr (necesario para marcar el extremo de la lista)
+		this->anterior = anterior;
 	}
 	template<class T>
 	Nodo<T>* Nodo<T>::getAnterior() {
@@ -26,9 +25,8 @@ namespace AEDnames {
 	}
 	template<class T>
 	void Nodo<T>::setSiguiente(Nodo<T>* siguiente) {
-		if (siguiente != nullptr) {
-			this->siguiente = siguiente;
-		}
+		// Permitimos nullptr (necesario para marcar el extremo de la lista)
+		this->siguiente = siguiente;
 	}
 	template<class T>
 	Nodo<T>* Nodo<T>::getSiguiente() {
@@ -109,11 +107,16 @@ namespace AEDnames {
 	template<typename T>
 	bool Lista<T>::deleteNode(int pos) {
 		Nodo<T>* nodo = find(pos);
+		if (nodo == nullptr) return false;
 		Nodo<T>* left = nodo->getAnterior();
 		Nodo<T>* right = nodo->getSiguiente();
-		left->setSiguiente(right);
-		right->setAnterior(left);
+		// Si borramos la cabeza o la cola, hay que reasignarlas
+		if (left != nullptr) left->setSiguiente(right);
+		else head = right;
+		if (right != nullptr) right->setAnterior(left);
+		else tail = left;
 		delete nodo;
+		size--;
 		return true;
 	}
 
@@ -130,14 +133,20 @@ namespace AEDnames {
 
 	template<typename T>
 	void Lista<T>::reverse() {
-		Nodo<T>* curr, ant;
-		curr = head;
-		for (int i = 0; i < size; i++) {
-			ant = curr->getAnterior;
-			curr->setAnterior(curr->getSiguiente);
-			curr->setSiguiente(curr->getAnterior);
-			curr = curr->getAnterior();//will go to next one, in the original order
+		// Recorremos la lista intercambiando anterior y siguiente en cada nodo
+		Nodo<T>* curr = head;
+		Nodo<T>* prev = nullptr;
+		while (curr != nullptr) {
+			Nodo<T>* nextOrig = curr->getSiguiente();
+			curr->setSiguiente(prev);
+			curr->setAnterior(nextOrig);
+			prev = curr;
+			curr = nextOrig;
 		}
+		// Intercambiamos head y tail
+		Nodo<T>* tmp = head;
+		head = tail;
+		tail = tmp;
 	}
 
 	template<typename T>

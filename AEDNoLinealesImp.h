@@ -3,6 +3,7 @@
 #include <queue>
 #include <set>
 #include <unordered_set>
+#include <cstdint>
 
 namespace AEDnames {
 
@@ -63,7 +64,7 @@ namespace AEDnames {
 		
 	}
 
-	// Auxiliar BFS que toma un nodo de grafo y construye un árbol (copia)
+	// Auxiliar BFS que toma un nodo de grafo y construye un ï¿½rbol (copia)
 	template<typename T>
 	NodoGraph<T>* spanningTreeAux(NodoGraph<T>* start) {
 		
@@ -102,7 +103,11 @@ namespace AEDnames {
 	//AEDMap
 	template<typename T>
 	int AEDMap<T>::badHash(T* value) {
-		return reinterpret_cast<short int>(value);//dangerous, will provoke collisions
+		// Cogemos los 16 bits bajos de la direccion como hash: provoca colisiones a proposito.
+		// Usamos uintptr_t para que el reinterpret_cast sea legal (puntero -> entero suficientemente grande).
+		if (value == nullptr) return 0;
+		auto p = reinterpret_cast<std::uintptr_t>(value);
+		return static_cast<int>(p & 0xFFFF);
 	}
 	template<typename T>
 	int AEDMap<T>::hashToIndex(int hash) {

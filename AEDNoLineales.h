@@ -10,32 +10,31 @@ namespace AEDnames {
 		NodoTree<T>* left;
 		NodoTree<T>* right;
 		NodoTree<T>* parent;
-		NodoTree() { left = nullptr; right = nullptr; };
-		NodoTree(int _dato, NodoTree* _left, NodoTree* _right)
-			: dato(_dato), left(_left), right(_right) {
+		NodoTree() : left(nullptr), right(nullptr), parent(nullptr) {};
+		NodoTree(T _dato, NodoTree* _left, NodoTree* _right)
+			: dato(_dato), left(_left), right(_right), parent(nullptr) {
 		}
 
 		//Rule of 3: the expected 3 but we implement them to practice
-		NodoTree(const NodoTree<T>& other) : dato(other.dato) {
-			delete this->left;
-			left = new NodoTree(*other.left);
-			delete this->right;
-			right = new NodoTree(*other.right);
+		NodoTree(const NodoTree<T>& other) : dato(other.dato), left(nullptr), right(nullptr), parent(nullptr) {
+			// copia profunda solo si los hijos existen (evita UB con punteros sin inicializar)
+			if (other.left) left = new NodoTree(*other.left);
+			if (other.right) right = new NodoTree(*other.right);
 		}
 		NodoTree& operator=(const NodoTree<T>& other) {
 			if (this != &other) {
 				dato = other.dato;
 				delete left;
-				left = new NodoTree(*other.left);
+				left = other.left ? new NodoTree(*other.left) : nullptr;
 				delete right;
-				right = new NodoTree(*other.right);
+				right = other.right ? new NodoTree(*other.right) : nullptr;
 			}
 			return *this;
 		}
 		~NodoTree() {
+			// NO borramos parent: el padre es propietario, no el hijo (evita doble delete)
 			delete left;
 			delete right;
-			delete parent;
 		}
 
 		bool isRoot();

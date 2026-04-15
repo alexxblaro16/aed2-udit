@@ -88,7 +88,7 @@ namespace AEDnames {
 		Nodo<T>* find(int pos);
 	public:
 		//Lista() { this.head = new Nodo<T>(); size = 1; }
-		Lista() { size = 0; }
+		Lista() : head(nullptr), tail(nullptr), size(0) {}
 
 		Nodo<T>* getHead() {
 			return this->head;
@@ -141,7 +141,7 @@ namespace AEDnames {
 		Nodo<T>* find(int pos);
 	public:
 		//SortedLista() { this.head = new Nodo<T>(); size = 1; }
-		SortedLista() { size = 0; }
+		SortedLista() : head(nullptr), tail(nullptr), size(0) {}
 
 		Nodo<T>* getHead() { return this->head; }
 		Nodo<T>* getTail() { return this->tail;	}
