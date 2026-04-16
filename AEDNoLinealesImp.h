@@ -10,35 +10,78 @@ namespace AEDnames {
 	//NodoTree
 	template<typename T>
 	bool NodoTree<T>::isRoot() {
-		
+		// Es raiz si no tiene padre
+		return this->parent == nullptr;
 	}
 	//these must work even if 'this' is not the root of the tree
 	template<typename T>
 	unsigned int NodoTree<T>::getUpHeight() {
-		
+		// Distancia (numero de aristas) entre este nodo y la raiz
+		unsigned int h = 0;
+		NodoTree<T>* cur = this->parent;
+		while (cur != nullptr) {
+			++h;
+			cur = cur->parent;
+		}
+		return h;
 	}
 	template<typename T>
 	unsigned int NodoTree<T>::getDownHeight() {
-		
+		// Distancia hasta la hoja mas lejana en su subarbol
+		// Caso base: hoja -> 0
+		if (this->left == nullptr && this->right == nullptr) return 0;
+		unsigned int hl = 0, hr = 0;
+		if (this->left) hl = 1 + this->left->getDownHeight();
+		if (this->right) hr = 1 + this->right->getDownHeight();
+		return hl > hr ? hl : hr;
 	}
 	template<typename T>
 	NodoTree<T>* NodoTree<T>::getleftleaf() {
-		
+		// Hoja mas a la izquierda del subarbol
+		NodoTree<T>* cur = this;
+		while (cur->left != nullptr || cur->right != nullptr) {
+			cur = cur->left != nullptr ? cur->left : cur->right;
+		}
+		return cur;
 	}
 
 	template<typename T>
 	NodoTree<T>* NodoTree<T>::getrightleaf() {
-		
+		// Hoja mas a la derecha del subarbol
+		NodoTree<T>* cur = this;
+		while (cur->left != nullptr || cur->right != nullptr) {
+			cur = cur->right != nullptr ? cur->right : cur->left;
+		}
+		return cur;
 	}
 	template<typename T>
 	NodoTree<T>* NodoTree<T>::getRoot() {
-		
+		// Sube por la cadena de padres hasta encontrar la raiz
+		NodoTree<T>* cur = this;
+		while (cur->parent != nullptr) cur = cur->parent;
+		return cur;
 	}
 
 	//AEDTree
 	template<typename T>
 	unsigned int AEDTree<T>::getHeight() {
-		
+		if (root == nullptr) return 0;
+		return root->getDownHeight();
+	}
+
+	template<typename T>
+	NodoTree<T>* AEDTree<T>::getleftleaf() {
+		return root ? root->getleftleaf() : nullptr;
+	}
+
+	template<typename T>
+	NodoTree<T>* AEDTree<T>::getrightleaf() {
+		return root ? root->getrightleaf() : nullptr;
+	}
+
+	template<typename T>
+	NodoTree<T>* AEDTree<T>::getRoot() {
+		return root;
 	}
 
 	//must walk through the children from right to left and ignore the leaves
