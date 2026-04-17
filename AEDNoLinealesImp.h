@@ -87,17 +87,37 @@ namespace AEDnames {
 	//must walk through the children from right to left and ignore the leaves
 	template<typename T>
 	std::vector<NodoTree<T>*> AEDTree<T>::breadthSpecial() {
-		
+		// BFS por niveles: hijos visitados de derecha a izquierda, hojas ignoradas (no se anyaden al resultado)
+		std::vector<NodoTree<T>*> res;
+		if (root == nullptr) return res;
+		std::queue<NodoTree<T>*> q;
+		q.push(root);
+		while (!q.empty()) {
+			NodoTree<T>* cur = q.front(); q.pop();
+			bool esHoja = (cur->left == nullptr && cur->right == nullptr);
+			if (!esHoja) res.push_back(cur);
+			// Encolamos primero el derecho para que se procese antes (derecha->izquierda)
+			if (cur->right) q.push(cur->right);
+			if (cur->left)  q.push(cur->left);
+		}
+		return res;
 	}
 	template<typename T>
 	void depthSpecialaux(NodoTree<T>* current, std::vector<NodoTree<T>*>* res) {
-		
+		if (current == nullptr) return;
+		bool esHoja = (current->left == nullptr && current->right == nullptr);
+		if (!esHoja) res->push_back(current);
+		// Preorden derecha->izquierda: visitamos derecho antes que izquierdo
+		if (current->right) depthSpecialaux(current->right, res);
+		if (current->left)  depthSpecialaux(current->left, res);
 	}
 
 	//must walk through the children from right to left and ignore the leaves
 	template<typename T>
 	std::vector<NodoTree<T>*> AEDTree<T>::depthSpecial() {
-		
+		std::vector<NodoTree<T>*> res;
+		depthSpecialaux(root, &res);
+		return res;
 	}
 
 	//Graph

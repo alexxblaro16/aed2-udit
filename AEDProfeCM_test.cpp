@@ -19,7 +19,7 @@ TEST(AEDProfeCMake_test, test3){
     delete n;
 }
 
-// Tests básicos para la clase Heap (usa el vector público `arr` y el struct NodoHeap)
+// Tests bï¿½sicos para la clase Heap (usa el vector pï¿½blico `arr` y el struct NodoHeap)
 TEST(Heap_test, heap_one_element) {
     AEDnames::Heap<int> h = AEDnames::Heap<int>();
     h.insert(10, 2);
@@ -169,6 +169,8 @@ TEST(AEDTree_test, tree_breadth) {
     expected.push_back(rleft);
 
 	EXPECT_EQ(actual, expected);
+    actual.clear();
+    expected.clear();
 
     AEDnames::NodoTree<int>* rleftleftleft = new AEDnames::NodoTree<int>(3, nullptr, nullptr);
     AEDnames::NodoTree<int>* rleftleftright = new AEDnames::NodoTree<int>(3, nullptr, nullptr);
@@ -176,14 +178,14 @@ TEST(AEDTree_test, tree_breadth) {
 	rleftleft->left = rleftleftleft;
     rleftleft->right = rleftleftright;
     rleftright->left = rleftrightleft;
-	
+
     actual = tree->breadthSpecial();
     expected.push_back(root);
     expected.push_back(rright);
     expected.push_back(rleft);
     expected.push_back(rleftright);
     expected.push_back(rleftleft);
-    
+
     EXPECT_EQ(actual, expected);
 }
 
@@ -395,7 +397,7 @@ size_t countReachable(AEDnames::NodoGraph<int>* start) {
 
 // Ejemplo: crear un grafo con ciclos y generar su spanning tree desde un nodo
 TEST(NodoGraph_test, spanningTree_example_bfs_copy) {
-    // Construcción del grafo original (posible ciclo)
+    // Construcciï¿½n del grafo original (posible ciclo)
     AEDnames::NodoGraph<int>* a = new AEDnames::NodoGraph<int>(1);
     AEDnames::NodoGraph<int>* b = new AEDnames::NodoGraph<int>(2);
     AEDnames::NodoGraph<int>* c = new AEDnames::NodoGraph<int>(3);
@@ -403,17 +405,17 @@ TEST(NodoGraph_test, spanningTree_example_bfs_copy) {
 
     a->addAdj(b, 1);
     a->addAdj(c, 1);
-    b->addAdj(c, 1); // arista que puede generar ciclo lógico
+    b->addAdj(c, 1); // arista que puede generar ciclo lï¿½gico
     c->addAdj(d, 1);
-    b->addAdj(a, 1); // ciclo explícito
+    b->addAdj(a, 1); // ciclo explï¿½cito
 
     size_t origCount = 4;
-    // Generar el spanning tree (debe devolver la raíz de una copia en forma de árbol)
+    // Generar el spanning tree (debe devolver la raï¿½z de una copia en forma de ï¿½rbol)
     AEDnames::NodoGraph<int>* treeRoot = a->spanningTree();
     ASSERT_NE(treeRoot, nullptr);
     EXPECT_EQ(treeRoot->dato, a->dato);
 
-    // Conteo de nodos en la copia (debería coincidir con origCount)
+    // Conteo de nodos en la copia (deberï¿½a coincidir con origCount)
     size_t copyCount = countReachable(treeRoot);
     EXPECT_EQ(copyCount, origCount);
 
@@ -518,7 +520,7 @@ TEST(AEDMap_Test, AEDmap_InsertContainsRemove) {
     int* a = new int(1);
     int* b = new int(2);
 
-    // inicialmente vacío
+    // inicialmente vacï¿½o
     EXPECT_TRUE(m.isEmpty());
 
     // insertar y comprobar contains/search
@@ -531,7 +533,7 @@ TEST(AEDMap_Test, AEDmap_InsertContainsRemove) {
     EXPECT_TRUE(m.contains(b));
 
 
-    // eliminar y comprobar que ya no está
+    // eliminar y comprobar que ya no estï¿½
     EXPECT_TRUE(m.remove(a));
     EXPECT_FALSE(m.contains(a));
     EXPECT_TRUE(m.contains(b));
@@ -553,7 +555,7 @@ TEST(AEDMap_Test, AEDmap_InsertContainsRemoveBulk) {
         EXPECT_TRUE(m.insert(vals.back()));
     }
 
-    // ahora no debe estar vacío y size() debe ser > 0 (número de buckets)
+    // ahora no debe estar vacï¿½o y size() debe ser > 0 (nï¿½mero de buckets)
     EXPECT_FALSE(m.isEmpty());
     EXPECT_GT(m.size(), 0);
 
@@ -568,8 +570,8 @@ TEST(AEDMap_Test, AEDmap_InsertContainsRemoveBulk) {
         delete p;
     }
 
-    // tras eliminar, isEmpty puede ser true si la implementación borra buckets vacíos
-    // no hacemos aserción estricta sobre size() final (depende de la implementación),
+    // tras eliminar, isEmpty puede ser true si la implementaciï¿½n borra buckets vacï¿½os
+    // no hacemos aserciï¿½n estricta sobre size() final (depende de la implementaciï¿½n),
     // pero todos los elementos deben haber sido eliminados.
     for (int* p : vals) {
         EXPECT_FALSE(m.contains(p));
