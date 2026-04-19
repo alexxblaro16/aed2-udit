@@ -143,22 +143,55 @@ namespace AEDnames {
 		
 	}
 
-	//Heap
+	//Heap (max-heap por prio: pop devuelve el de mayor prioridad)
 	template <typename T>
 	void Heap<T>::insert(T dato, int prio) {
-		
+		// Insertamos al final y subimos el elemento hasta su posicion correcta
+		NodoHeap<T> n;
+		n.dato = dato;
+		n.prio = prio;
+		arr.push_back(n);
+		size++;
+		upHeap(static_cast<int>(arr.size()) - 1);
 	}
 	template <typename T>
 	NodoHeap<T> Heap<T>::pop() {
-		
+		// Sacamos la raiz (mayor prio). Movemos el ultimo a la raiz y bajamos.
+		NodoHeap<T> top = arr[0];
+		int last = static_cast<int>(arr.size()) - 1;
+		arr[0] = arr[last];
+		arr.pop_back();
+		size--;
+		if (!arr.empty()) downHeap(0);
+		return top;
 	}
 	template <typename T>
 	void Heap<T>::upHeap(int i) {
-
+		while (i > 0) {
+			int parent = (i - 1) / 2;
+			// Si el hijo es mayor que el padre, intercambiamos
+			if (arr[parent] < arr[i]) {
+				std::swap(arr[parent], arr[i]);
+				i = parent;
+			} else {
+				break;
+			}
+		}
 	}
 	template <typename T>
 	void Heap<T>::downHeap(int i) {
-
+		int n = static_cast<int>(arr.size());
+		while (true) {
+			int left = 2 * i + 1;
+			int right = 2 * i + 2;
+			int largest = i;
+			// Buscamos el mayor entre i y sus dos hijos (si existen)
+			if (left < n && arr[largest] < arr[left]) largest = left;
+			if (right < n && arr[largest] < arr[right]) largest = right;
+			if (largest == i) break;
+			std::swap(arr[i], arr[largest]);
+			i = largest;
+		}
 	}
 
 
