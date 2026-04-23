@@ -124,23 +124,123 @@ namespace AEDnames {
 
 	template<typename T>
 	NodoGraph<T>* NodoGraph<T>::search(T dato) {
-		
+		// BFS desde 'this'. Si 'this' coincide ya devolvemos this. Si no, recorremos adyacencias.
+		if (this->dato == dato) return this;
+		std::unordered_set<NodoGraph<T>*> vis;
+		std::queue<NodoGraph<T>*> q;
+		vis.insert(this);
+		q.push(this);
+		while (!q.empty()) {
+			NodoGraph<T>* cur = q.front(); q.pop();
+			for (auto& adjPair : cur->adjs) {
+				NodoGraph<T>* adj = adjPair.first;
+				if (vis.count(adj)) continue;
+				if (adj->dato == dato) return adj;
+				vis.insert(adj);
+				q.push(adj);
+			}
+		}
+		return nullptr;
 	}
 
-	// Auxiliar BFS que toma un nodo de grafo y construye un �rbol (copia)
+	// Auxiliar BFS que toma un nodo de grafo y construye un arbol (copia)
 	template<typename T>
 	NodoGraph<T>* spanningTreeAux(NodoGraph<T>* start) {
-		
+		// Copia profunda BFS: cada nodo del grafo original tiene una copia 1:1.
+		// Las aristas que cerrarian ciclo se descartan (asi sale un arbol).
+		std::unordered_map<NodoGraph<T>*, NodoGraph<T>*> mapping;
+		NodoGraph<T>* copyRoot = new NodoGraph<T>(start->dato);
+		mapping[start] = copyRoot;
+		std::queue<NodoGraph<T>*> q;
+		q.push(start);
+		while (!q.empty()) {
+			NodoGraph<T>* orig = q.front(); q.pop();
+			NodoGraph<T>* copy = mapping[orig];
+			for (auto& adjPair : orig->adjs) {
+				NodoGraph<T>* adj = adjPair.first;
+				unsigned int w = adjPair.second;
+				// Solo creamos la copia y conectamos si no estaba visitada (asi evitamos ciclos)
+				if (mapping.find(adj) == mapping.end()) {
+					NodoGraph<T>* copyAdj = new NodoGraph<T>(adj->dato);
+					mapping[adj] = copyAdj;
+					copy->addAdj(copyAdj, w);
+					q.push(adj);
+				}
+			}
+		}
+		return copyRoot;
 	}
 
 	template<typename T>
 	NodoGraph<T>* NodoGraph<T>::spanningTree() {
-		
+		// Devuelve la raiz de un arbol de expansion (copia profunda) calculado por BFS.
+		return spanningTreeAux(this);
+	}
+
+	// findPath: DFS que devuelve cualquier camino entre init y dest.
+	template<typename T>
+	bool findPathAux(NodoGraph<T>* cur, NodoGraph<T>* dest,
+					 std::vector<NodoGraph<T>*>& path,
+					 std::unordered_set<NodoGraph<T>*>& vis) {
+		path.push_back(cur);
+		if (cur == dest) return true;
+		vis.insert(cur);
+		for (auto& adjPair : cur->adjs) {
+			if (vis.count(adjPair.first)) continue;
+			if (findPathAux(adjPair.first, dest, path, vis)) return true;
+		}
+		path.pop_back();
+		return false;
+	}
+
+	template<typename T>
+	std::vector<NodoGraph<T>*> NodoGraph<T>::findPath(NodoGraph<T>* init, NodoGraph<T>* dest) {
+		std::vector<NodoGraph<T>*> path;
+		std::unordered_set<NodoGraph<T>*> vis;
+		findPathAux(init, dest, path, vis);
+		return path;
 	}
 
 	template<typename T>
 	std::vector<NodoGraph<T>*> AEDnames::NodoGraph<T>::findMinPath(NodoGraph<T>* init, NodoGraph<T>* dest) {
-		
+		// Dijkstra exacto usando nuestro Heap. El Heap es max-heap por prio,
+		// asi que pasamos -dist como prio para sacar siempre el de menor distancia.
+		std::unordered_map<NodoGraph<T>*, unsigned int> dist;
+		std::unordered_map<NodoGraph<T>*, NodoGraph<T>*> prev;
+		Heap<NodoGraph<T>*> pq;
+		dist[init] = 0;
+		pq.insert(init, 0);
+		while (pq.size > 0) {
+			NodoHeap<NodoGraph<T>*> top = pq.pop();
+			NodoGraph<T>* u = top.dato;
+			unsigned int d = static_cast<unsigned int>(-top.prio);
+			// Si esta entrada esta desfasada (encontramos una mejor antes), la saltamos
+			auto itD = dist.find(u);
+			if (itD == dist.end() || d > itD->second) continue;
+			if (u == dest) break;
+			for (auto& adjPair : u->adjs) {
+				NodoGraph<T>* v = adjPair.first;
+				unsigned int w = adjPair.second;
+				unsigned int nd = d + w;
+				auto it = dist.find(v);
+				if (it == dist.end() || nd < it->second) {
+					dist[v] = nd;
+					prev[v] = u;
+					pq.insert(v, -static_cast<int>(nd));
+				}
+			}
+		}
+		// Reconstruimos el camino desde dest siguiendo los predecesores
+		std::vector<NodoGraph<T>*> path;
+		if (dist.find(dest) == dist.end()) return path;
+		NodoGraph<T>* cur = dest;
+		while (cur != nullptr) {
+			path.push_back(cur);
+			auto it = prev.find(cur);
+			cur = (it == prev.end()) ? nullptr : it->second;
+		}
+		std::reverse(path.begin(), path.end());
+		return path;
 	}
 
 	//Heap (max-heap por prio: pop devuelve el de mayor prioridad)

@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
+#include <algorithm>
 
 namespace AEDnames {
 	
@@ -126,6 +128,9 @@ namespace AEDnames {
 		NodoGraph<T>* search(T dato);
 		//NOT OPTIMAL returns a tree formed by NodoGraph
 		NodoGraph<T>* spanningTree();
+		// Devuelve un camino cualquiera entre init y dest (DFS)
+		std::vector<NodoGraph<T>*> findPath(NodoGraph<T>* init, NodoGraph<T>* dest);
+		// Devuelve el camino minimo entre init y dest (Dijkstra con Heap propio)
 		std::vector<NodoGraph<T>*> findMinPath(NodoGraph<T>* init, NodoGraph<T>* dest);
 
 	};
