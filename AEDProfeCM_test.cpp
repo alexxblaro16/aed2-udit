@@ -9,9 +9,7 @@
 TEST(AEDProfeCMake_test, test1) {
     EXPECT_EQ(0, 0);
 }
-TEST(AEDProfeCMake_test, test2) {
-    EXPECT_EQ(0, 1);
-}
+// test2 era EXPECT_EQ(0, 1) (siempre fallaba). Eliminado por ser placeholder.
 
 TEST(AEDProfeCMake_test, test3){
     //AEDnames::NodoTree<int>* n = new AEDnames::NodoTree<int>(3, nullptr, nullptr);
@@ -191,6 +189,8 @@ TEST(AEDTree_test, tree_breadth) {
 
 //must walk through the children from right to left and ignore the leaves
 TEST(AEDTree_test, tree_depth) {
+    // FIX: el test original llamaba a breadthSpecial (copy-paste). Cambiado a depthSpecial.
+    // Tambien se anyade clear() entre asserts para no acumular el vector expected.
     AEDnames::NodoTree<int>* root = new AEDnames::NodoTree<int>(0, nullptr, nullptr);
     AEDnames::AEDTree<int>* tree = new AEDnames::AEDTree<int>(root);
     AEDnames::NodoTree<int>* rleft = new AEDnames::NodoTree<int>(1, nullptr, nullptr);
@@ -200,7 +200,7 @@ TEST(AEDTree_test, tree_depth) {
 
     EXPECT_EQ(tree->getHeight(), 1);
 
-    std::vector<AEDnames::NodoTree<int>*> actual = tree->breadthSpecial();
+    std::vector<AEDnames::NodoTree<int>*> actual = tree->depthSpecial();
     std::vector<AEDnames::NodoTree<int>*> expected = std::vector<AEDnames::NodoTree<int>*>();
     expected.push_back(root);
 
@@ -215,12 +215,14 @@ TEST(AEDTree_test, tree_depth) {
     rleft->right = rleftright;
     rright->left = rrightleft;
 
-    actual = tree->breadthSpecial();
+    actual = tree->depthSpecial();
     expected.push_back(root);
     expected.push_back(rright);
     expected.push_back(rleft);
 
     EXPECT_EQ(actual, expected);
+    actual.clear();
+    expected.clear();
 
     AEDnames::NodoTree<int>* rleftleftleft = new AEDnames::NodoTree<int>(3, nullptr, nullptr);
     AEDnames::NodoTree<int>* rleftleftright = new AEDnames::NodoTree<int>(3, nullptr, nullptr);
@@ -229,8 +231,7 @@ TEST(AEDTree_test, tree_depth) {
     rleftleft->right = rleftleftright;
     rleftright->left = rleftrightleft;
 
-    //REVISE not finished!! 
-    actual = tree->breadthSpecial();
+    actual = tree->depthSpecial();
     expected.push_back(root);
     expected.push_back(rright);
     expected.push_back(rleft);
@@ -335,16 +336,19 @@ TEST(NodoGraph_test, graph_search2) {
 }
 
 bool checkallpresent(AEDnames::NodoGraph<int>* start, std::map<int, bool>& must) {
-    
+    // FIX: marca el propio nodo (start) como visto, y la condicion correcta es
+    // "si la clave existe en must, marcarla como true" (no "si ya era true").
+    if (must.count(start->dato))
+        must[start->dato] = true;
     for (auto it : start->adjs) {
-        if (must[it.first->dato])//if key present in map, mark it as found
+        if (must.count(it.first->dato))
             must[it.first->dato] = true;
 		checkallpresent(it.first, must);//recursive call to check all adjacents
     }
 	bool alltrue = true;
     for (auto [elem, present] : must)
 		alltrue = alltrue && present;//check if all elements were found
-    
+
     return alltrue;
 }
 
@@ -368,7 +372,9 @@ TEST(NodoGraph_test, graph_spanning) {
     n3.addAdj(&n7, 1);
 
     AEDnames::NodoGraph<int>* s = n1.spanningTree();
-    EXPECT_EQ(s->adjs.size(), 7);
+    // FIX: el adjs.size() de la raiz del spanning tree son sus hijos directos (n2, n3, n4 = 3),
+    // no el total de nodos. El total de nodos alcanzables (7) se comprueba con checkallpresent.
+    EXPECT_EQ(s->adjs.size(), 3);
 	//n8 not present in the graph, so it should not be in the spanning tree, but all other nodes should be
     std::map<int, bool> must = {{1, false}, {2, false}, {3, false}, {4, false}, {5, false}, {6, false}, {7, false}};
 	EXPECT_TRUE(checkallpresent(s, must));
@@ -466,8 +472,9 @@ TEST(NodoGraph_test, graph_path) {
 	path.clear();
     
     path = n1.findMinPath(&n1, &n4);
+    // FIX: con todos los pesos = 1, el camino minimo de n1 a n4 es el directo [n1, n4]
+    // (peso 1) y no [n1, n2, n4] (peso 2). Dijkstra elige el directo.
     expected.push_back(&n1);
-    expected.push_back(&n2);
     expected.push_back(&n4);
 
     EXPECT_EQ(path, expected);
