@@ -141,7 +141,8 @@ namespace AEDnames {
 		//maps the hash of a value to the index of the bucket in the table where it is stored
 		std::unordered_map<int, unsigned int> hashToIndexMap;
 	public:
-		std::vector<std::vector<T>> table;//inner vector is the bucket of objects with the same hash or key
+		// El bucket guarda PUNTEROS (T*) para cumplir el criterio "guardar punteros a objetos"
+		std::vector<std::vector<T*>> table;
 
 		//not a real hash function
 		int badHash(T* value);
