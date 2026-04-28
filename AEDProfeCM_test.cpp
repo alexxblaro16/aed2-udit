@@ -492,24 +492,27 @@ TEST(NodoGraph_test, graph_path) {
 
 //AEDmap tests
 TEST(AEDMap_Test, AEDmap_one_elem) {
+    // FIX: el test original llamaba hashToIndex antes del insert (size()==0 -> EXPECT_LT fallaba).
+    // Reordenado: badHash determinista se comprueba antes; hashToIndex despues del insert.
     AEDnames::AEDMap<int> m;
     int* v = new int(12345);
 
     EXPECT_EQ(m.isEmpty(), true);
     EXPECT_EQ(m.size(), 0);
 
-    // badHash debe ser determinista
+    // badHash debe ser determinista (no depende de insert)
     int h1 = m.badHash(v);
     int h2 = m.badHash(v);
     EXPECT_EQ(h1, h2);
 
-    int idx = m.hashToIndex(h1);
-    EXPECT_GE(idx, 0);
-    EXPECT_LT(idx, m.size());
-
     // Insertemos para garantizar que hay buckets y size() > 0 antes de usar hashToIndex
     bool ins = m.insert(v);
     EXPECT_TRUE(ins);
+
+    // Ahora si tiene sentido comprobar hashToIndex
+    int idx = m.hashToIndex(h1);
+    EXPECT_GE(idx, 0);
+    EXPECT_LT(idx, m.size());
 
 	EXPECT_TRUE(!m.isEmpty());
     EXPECT_EQ(m.size(), 1);
