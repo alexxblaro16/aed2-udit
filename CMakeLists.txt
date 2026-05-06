@@ -25,13 +25,17 @@ endif()
 #for Google Test:
 enable_testing()
 
-add_executable( ${ProjectTarget}_test 
+add_executable( ${ProjectTarget}_test
 				"${ProjectName}_test.cpp"
 				"${LibTarget}.h" "${LibTarget}I.h" "${LibTarget}.cpp"
+				"AEDNoLineales.h" "AEDNoLinealesImp.h"
 				)
-target_link_libraries( ${ProjectTarget}_test	
+target_link_libraries( ${ProjectTarget}_test
 	GTest::gtest_main
 	)
+if (CMAKE_VERSION VERSION_GREATER 3.12)
+  set_property(TARGET ${ProjectTarget}_test PROPERTY CXX_STANDARD 20)
+endif()
 
 include(GoogleTest)
 gtest_discover_tests(${ProjectTarget}_test)

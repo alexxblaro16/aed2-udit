@@ -587,3 +587,124 @@ TEST(AEDMap_Test, AEDmap_InsertContainsRemoveBulk) {
         EXPECT_FALSE(m.contains(p));
     }
 }
+
+
+// =============================================================================
+// 7 TESTS UNITARIOS EXTRA (PARTE 2)
+// Probamos los algoritmos con casos no triviales que el test base no cubre.
+// =============================================================================
+
+// 1) AEDTree con un solo nodo: el unico nodo es hoja, asi que breadthSpecial/depthSpecial
+//    deben devolver vector vacio (las hojas se ignoran).
+TEST(Extra_Tree, single_node_is_leaf) {
+    AEDnames::NodoTree<int>* root = new AEDnames::NodoTree<int>(42, nullptr, nullptr);
+    AEDnames::AEDTree<int>* tree = new AEDnames::AEDTree<int>(root);
+
+    EXPECT_EQ(tree->getHeight(), 0u);
+    EXPECT_TRUE(tree->breadthSpecial().empty());
+    EXPECT_TRUE(tree->depthSpecial().empty());
+
+    delete tree;
+    delete root;
+}
+
+// 2) NodoTree: getUpHeight cuenta padres correctamente cuando se enlaza parent manualmente.
+TEST(Extra_Tree, upHeight_with_parents) {
+    AEDnames::NodoTree<int>* a = new AEDnames::NodoTree<int>(1, nullptr, nullptr);
+    AEDnames::NodoTree<int>* b = new AEDnames::NodoTree<int>(2, nullptr, nullptr);
+    AEDnames::NodoTree<int>* c = new AEDnames::NodoTree<int>(3, nullptr, nullptr);
+    a->left = b; b->parent = a;
+    b->left = c; c->parent = b;
+
+    EXPECT_EQ(a->getUpHeight(), 0u);
+    EXPECT_EQ(b->getUpHeight(), 1u);
+    EXPECT_EQ(c->getUpHeight(), 2u);
+    EXPECT_EQ(c->getRoot(), a);
+
+    delete a; // borra cascada
+}
+
+// 3) Heap: secuencia mixta de inserts y pops. Verificamos que siempre sale el de mayor prio.
+TEST(Extra_Heap, mixed_inserts_and_pops) {
+    AEDnames::Heap<int> h;
+    int prios[] = { 5, 10, 1, 7, 3, 9, 2 };
+    for (int p : prios) h.insert(p * 10, p);
+
+    EXPECT_EQ(h.pop().prio, 10);
+    EXPECT_EQ(h.pop().prio, 9);
+    h.insert(100, 8);
+    EXPECT_EQ(h.pop().prio, 8);
+    EXPECT_EQ(h.pop().prio, 7);
+    EXPECT_EQ(h.pop().prio, 5);
+}
+
+// 4) NodoGraph::findMinPath con pesos NO uniformes. Aqui se demuestra que la
+//    funcion es Dijkstra real y no un BFS o DFS: el camino directo tiene peso 100,
+//    pero hay un atajo n1->n2->n3 con peso 1+1=2.
+TEST(Extra_Graph, findMinPath_non_uniform_weights) {
+    AEDnames::NodoGraph<int> n1(1), n2(2), n3(3);
+    n1.addAdj(&n3, 100);  // camino directo, pero pesado
+    n1.addAdj(&n2, 1);
+    n2.addAdj(&n3, 1);
+
+    auto path = n1.findMinPath(&n1, &n3);
+    std::vector<AEDnames::NodoGraph<int>*> expected{ &n1, &n2, &n3 };
+    EXPECT_EQ(path, expected);
+}
+
+// 5) NodoGraph::findMinPath cuando el destino no es alcanzable: devuelve vector vacio.
+TEST(Extra_Graph, findMinPath_unreachable) {
+    AEDnames::NodoGraph<int> n1(1), n2(2), n3(3);
+    n1.addAdj(&n2, 1);
+    // n3 no esta conectado
+
+    auto path = n1.findMinPath(&n1, &n3);
+    EXPECT_TRUE(path.empty());
+}
+
+// 6) NodoGraph::findPath devuelve UN camino cualquiera (DFS). No tiene que ser minimo.
+TEST(Extra_Graph, findPath_returns_some_path) {
+    AEDnames::NodoGraph<int> n1(1), n2(2), n3(3), n4(4);
+    n1.addAdj(&n2, 1);
+    n2.addAdj(&n3, 1);
+    n3.addAdj(&n4, 1);
+
+    auto path = n1.findPath(&n1, &n4);
+    ASSERT_FALSE(path.empty());
+    EXPECT_EQ(path.front(), &n1);
+    EXPECT_EQ(path.back(), &n4);
+}
+
+// 7) AEDMap: provocamos colision forzada insertando dos punteros con direcciones
+//    distintas y comprobamos que ambos siguen encontrables aunque caigan en
+//    el mismo bucket (depende del badHash).
+TEST(Extra_Map, collisions_keep_elements_findable) {
+    AEDnames::AEDMap<int> m;
+    int* a = new int(7);
+    int* b = new int(8);
+    EXPECT_TRUE(m.insert(a));
+    EXPECT_TRUE(m.insert(b));
+    EXPECT_TRUE(m.contains(a));
+    EXPECT_TRUE(m.contains(b));
+    EXPECT_EQ(m.size(), 2);
+
+    // Borrar uno deja el otro encontrable
+    EXPECT_TRUE(m.remove(a));
+    EXPECT_FALSE(m.contains(a));
+    EXPECT_TRUE(m.contains(b));
+
+    EXPECT_TRUE(m.remove(b));
+    EXPECT_TRUE(m.isEmpty());
+
+    delete a;
+    delete b;
+}
+
+// 8) AEDMap: el remove sobre un puntero no insertado devuelve false.
+TEST(Extra_Map, remove_missing_returns_false) {
+    AEDnames::AEDMap<int> m;
+    int* a = new int(1);
+    EXPECT_FALSE(m.remove(a)); // nunca se inserto
+    EXPECT_FALSE(m.contains(a));
+    delete a;
+}
