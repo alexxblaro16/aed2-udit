@@ -15,11 +15,15 @@ add_executable (Nolineales "AEDNoLineales.h" "AEDNoLinealesImp.h" "${ProjectName
 # Parte 1: Hospital con punteros (reimplementacion de la practica 1)
 add_executable (HospitalP2 "HospitalP2.h" "HospitalP2.cpp" "HospitalP2_main.cpp")
 
+# Smoke test sin Google Test: instancia las clases de Parte 2 y comprueba que compilan/funcionan
+add_executable (SmokeNolineales "smoke_nolineales.cpp" "AEDNoLineales.h" "AEDNoLinealesImp.h" "${LibTarget}.h" "${LibTarget}I.h" "${LibTarget}.cpp")
+
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AEDProfeCM PROPERTY CXX_STANDARD 20)
   set_property(TARGET Nolineales PROPERTY CXX_STANDARD 20)
   set_property(TARGET HospitalP2 PROPERTY CXX_STANDARD 20)
+  set_property(TARGET SmokeNolineales PROPERTY CXX_STANDARD 20)
 endif()
 
 #for Google Test:
