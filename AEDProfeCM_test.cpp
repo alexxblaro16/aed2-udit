@@ -21,9 +21,10 @@ TEST(AEDProfeCMake_test, test3){
 TEST(Heap_test, heap_one_element) {
     AEDnames::Heap<int> h = AEDnames::Heap<int>();
     h.insert(10, 2);
- 
+
     EXPECT_EQ(h.pop().prio, 2);
-    EXPECT_EQ(h.size, 1);
+    // FIX: tras insertar 1 y hacer pop, size debe ser 0 (el test original ponia 1).
+    EXPECT_EQ(h.size, 0);
 
 }
 TEST(Heap_test, heap_and_top_prio) {

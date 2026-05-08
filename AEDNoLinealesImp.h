@@ -257,6 +257,8 @@ namespace AEDnames {
 	template <typename T>
 	NodoHeap<T> Heap<T>::pop() {
 		// Sacamos la raiz (mayor prio). Movemos el ultimo a la raiz y bajamos.
+		// Si el heap esta vacio devolvemos un NodoHeap por defecto en vez de crashear.
+		if (arr.empty()) return NodoHeap<T>();
 		NodoHeap<T> top = arr[0];
 		int last = static_cast<int>(arr.size()) - 1;
 		arr[0] = arr[last];
