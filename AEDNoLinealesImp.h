@@ -1,3 +1,4 @@
+#pragma once
 #include "AEDNoLineales.h"
 #include <algorithm>
 #include <queue>
