@@ -25,3 +25,8 @@ Release/
 # Otros
 *.o
 *.exe.manifest
+
+# Runner local de tests sin GTest (no se entrega al profe)
+fake_gtest_inc/
+test_main.cpp
+test_runner.exe

@@ -310,42 +310,43 @@ namespace AEDnames {
 	}
 	template<typename T>
 	int AEDMap<T>::hashToIndex(int hash) {
-		// Devuelve el indice del bucket asociado a este hash. Si no existe, -1.
-		auto it = hashToIndexMap.find(hash);
-		if (it == hashToIndexMap.end()) return -1;
-		return static_cast<int>(it->second);
+		// Recorrido lineal de hashesActive: si el hash esta registrado, devolvemos
+		// su posicion en el array. Si no, -1.
+		for (size_t i = 0; i < hashesActive.size(); ++i) {
+			if (hashesActive[i] == hash) return static_cast<int>(i);
+		}
+		return -1;
 	}
 	template<typename T>
 	bool AEDMap<T>::insert(T* value) {
-		// Si el hash no tiene bucket asignado, creamos uno nuevo. Despues empujamos el puntero.
+		// Si el hash no tiene bucket asignado, creamos uno nuevo al final del array.
+		// Despues empujamos el puntero en el bucket correspondiente.
 		if (value == nullptr) return false;
 		int h = badHash(value);
-		auto it = hashToIndexMap.find(h);
-		unsigned int idx;
-		if (it == hashToIndexMap.end()) {
-			idx = lastindex;
-			hashToIndexMap[h] = idx;
+		int idx = hashToIndex(h);
+		if (idx < 0) {
+			hashesActive.push_back(h);
 			table.push_back(std::vector<T*>());
-			lastindex++;
-		} else {
-			idx = it->second;
+			idx = static_cast<int>(hashesActive.size()) - 1;
 		}
-		table[idx].push_back(value);
+		table[static_cast<size_t>(idx)].push_back(value);
 		return true;
 	}
 	template<typename T>
 	bool AEDMap<T>::remove(T* value) {
 		if (value == nullptr) return false;
 		int h = badHash(value);
-		auto it = hashToIndexMap.find(h);
-		if (it == hashToIndexMap.end()) return false;
-		unsigned int idx = it->second;
-		auto& bucket = table[idx];
+		int idx = hashToIndex(h);
+		if (idx < 0) return false;
+		auto& bucket = table[static_cast<size_t>(idx)];
 		for (auto bit = bucket.begin(); bit != bucket.end(); ++bit) {
 			if (*bit == value) {
 				bucket.erase(bit);
 				// Si el bucket queda vacio, borramos la clave del mapa (deja de estar presente)
-				if (bucket.empty()) hashToIndexMap.erase(h);
+				if (bucket.empty()) {
+					hashesActive.erase(hashesActive.begin() + idx);
+					table.erase(table.begin() + idx);
+				}
 				return true;
 			}
 		}
@@ -357,11 +358,11 @@ namespace AEDnames {
 		// Devuelve la posicion dentro del bucket donde esta el puntero, o -1 si no existe.
 		if (value == nullptr) return -1;
 		int h = badHash(value);
-		auto it = hashToIndexMap.find(h);
-		if (it == hashToIndexMap.end()) return -1;
-		unsigned int idx = it->second;
-		for (size_t i = 0; i < table[idx].size(); ++i) {
-			if (table[idx][i] == value) return static_cast<int>(i);
+		int idx = hashToIndex(h);
+		if (idx < 0) return -1;
+		auto& bucket = table[static_cast<size_t>(idx)];
+		for (size_t i = 0; i < bucket.size(); ++i) {
+			if (bucket[i] == value) return static_cast<int>(i);
 		}
 		return -1;
 	}
@@ -372,7 +373,7 @@ namespace AEDnames {
 	template<typename T>
 	bool AEDMap<T>::isEmpty() {
 		// El mapa esta vacio si no queda ninguna clave registrada
-		return hashToIndexMap.empty();
+		return hashesActive.empty();
 	}
 	template<typename T>
 	int AEDMap<T>::size() {

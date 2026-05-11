@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <unordered_map>
+#include <unordered_map> // se usa solo en NodoGraph (Parte 2 Grafos permite STL)
 #include <algorithm>
 
 namespace AEDnames {
@@ -137,15 +137,17 @@ namespace AEDnames {
 
 	template<typename T>
 	class AEDMap {
-		unsigned int lastindex = 0;
-		//maps the hash of a value to the index of the bucket in the table where it is stored
-		std::unordered_map<int, unsigned int> hashToIndexMap;
+		// Vector paralelo: hashesActive[i] es la clave hash del bucket table[i].
+		// Asi cumplimos con la restriccion del enunciado: solo array/vector/list,
+		// nada de std::map ni std::unordered_map ni funciones hash de la std lib.
+		std::vector<int> hashesActive;
 	public:
 		// El bucket guarda PUNTEROS (T*) para cumplir el criterio "guardar punteros a objetos"
 		std::vector<std::vector<T*>> table;
 
 		//not a real hash function
 		int badHash(T* value);
+		// Devuelve la posicion del bucket asociado a este hash en el array, o -1 si no existe.
 		int hashToIndex(int hash);
 
 
