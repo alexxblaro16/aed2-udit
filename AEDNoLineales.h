@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <unordered_map> // se usa solo en NodoGraph (Parte 2 Grafos permite STL)
 #include <algorithm>
 
 namespace AEDnames {
